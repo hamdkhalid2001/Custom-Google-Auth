@@ -1,4 +1,5 @@
 ﻿using Custom_Google_Auth.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +16,8 @@ namespace Custom_Google_Auth.Controllers
         {
             _dbContext = dbContext;
         }
+
+        [Authorize]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Products>>> GetProducts()
         {
