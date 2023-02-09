@@ -1,6 +1,8 @@
 using Custom_Google_Auth.Models;
+using Custom_Google_Auth.Services;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +11,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("sql"));
 });
+builder.Services.AddScoped<ITokenCreationService,JwtService>();
 builder.Services
     .AddIdentityCore<Users>(options => {
         options.SignIn.RequireConfirmedAccount = false;
