@@ -11,13 +11,22 @@ var config = new ConfigurationBuilder()
         .AddJsonFile("appsettings.json", optional: false)
         .Build();
 // Add services to the container.
+
+// For Entity Framework 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("sql"));
 });
-builder.Services.AddScoped<ITokenCreationService,JwtService>();
+
+// For Identity  
+builder.Services.AddIdentity<Users, IdentityRole>()
+    .AddEntityFrameworkStores<ApplicationDbContext>()
+    .AddDefaultTokenProviders();
+
+builder.Services.AddScoped<ITokenCreationService, JwtService>();
 builder.Services
-    .AddIdentityCore<Users>(options => {
+    .AddIdentityCore<Users>(options =>
+    { 
         options.SignIn.RequireConfirmedAccount = false;
         options.User.RequireUniqueEmail = true;
         options.Password.RequireDigit = false;
@@ -26,11 +35,21 @@ builder.Services
         options.Password.RequireUppercase = false;
         options.Password.RequireLowercase = false;
     })
+    .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
+
+// Adding Authentication 
 builder.Services
-    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-    .AddJwtBearer(options =>
+    .AddAuthentication(options =>
     {
+        options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+        options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddJwtBearer(options => //Adding Jwt Bearer
+    {
+        options.SaveToken = true;
+        options.RequireHttpsMetadata = false;
         options.TokenValidationParameters = new TokenValidationParameters()
         {
             ValidateIssuer = true,

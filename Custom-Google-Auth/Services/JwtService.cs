@@ -2,10 +2,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
-using Custom_Google_Auth.Authentication;
 using Custom_Google_Auth.Models;
-using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
 
 namespace Custom_Google_Auth.Services
@@ -18,19 +15,19 @@ namespace Custom_Google_Auth.Services
         {
             _configuration = configuration;
         }
-        public AuthenticationResponse CreateToken(Users user)
+        public object CreateToken(Users user,string role)
         {
             var expiration = DateTime.UtcNow.AddMinutes(EXPIRATION_MINUTES);
 
             var token = CreateJwtToken(
-                CreateClaims(user),
+                CreateClaims(user,role),
                 CreateSigningCredentials(),
                 expiration
             );
 
             var tokenHandler = new JwtSecurityTokenHandler();
 
-            return new AuthenticationResponse
+            return new
             {
                 Token = tokenHandler.WriteToken(token),
                 Expiration = expiration
@@ -45,13 +42,14 @@ namespace Custom_Google_Auth.Services
                 signingCredentials: credentials
             );
 
-        private Claim[] CreateClaims(Users user) =>
+        private Claim[] CreateClaims(Users user,string role) =>
             new[] {
-                new Claim(JwtRegisteredClaimNames.Sub, _configuration["Jwt:Subject"]),
+                new Claim(JwtRegisteredClaimNames.Sub,user.UserName),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
                 new Claim(JwtRegisteredClaimNames.Iat, DateTime.UtcNow.ToString()),
                 new Claim(ClaimTypes.NameIdentifier, user.Id),
                 new Claim(ClaimTypes.Name, user.UserName),
+                new Claim(ClaimTypes.Role,role),
                 new Claim(ClaimTypes.Email, user.Email)
             };
 

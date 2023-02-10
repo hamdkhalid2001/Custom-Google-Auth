@@ -17,7 +17,7 @@ namespace Custom_Google_Auth.Controllers
             _dbContext = dbContext;
         }
 
-        [Authorize]
+        [Authorize(Roles = "Admin")]
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Products>>> GetProducts()
         {
