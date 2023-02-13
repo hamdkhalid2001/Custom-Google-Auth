@@ -13,7 +13,6 @@ namespace Custom_Google_Auth.Models.Authentication
 
         [Required(ErrorMessage = "Password is required")]
         public string Password { get; set; }
-        [Required(ErrorMessage = "Role is required")]
         public string Role { get; set; }
         [Required(ErrorMessage = "Age is required")]
         public int Age { get; set; }
