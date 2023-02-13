@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CustomGoogleAuth.Migrations
 {
     /// <inheritdoc />
-    public partial class Initial : Migration
+    public partial class INITIAL : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -179,8 +179,8 @@ namespace CustomGoogleAuth.Migrations
                 columns: new[] { "Id", "ConcurrencyStamp", "Name", "NormalizedName" },
                 values: new object[,]
                 {
-                    { "226b3610-f3e5-4cab-bfda-97a18275ee56", "1", "Admin", "Admin" },
-                    { "2b03696f-6b96-4747-982b-d75f52cc8fd5", "2", "User", "User" }
+                    { "3ca82870-81d9-4a1c-a205-13fa812d018b", "2", "User", "User" },
+                    { "bc69af5c-8e0c-4a77-aa66-c2a1a010170e", "1", "Admin", "Admin" }
                 });
 
             migrationBuilder.CreateIndex(

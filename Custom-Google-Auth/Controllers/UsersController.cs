@@ -2,8 +2,10 @@
 using Custom_Google_Auth.Models;
 using Custom_Google_Auth.Models.Authentication;
 using Custom_Google_Auth.Services;
+using Google.Apis.Auth;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using System.Data;
 
 namespace Custom_Google_Auth.Controllers
 {
@@ -14,11 +16,14 @@ namespace Custom_Google_Auth.Controllers
         private readonly UserManager<Users> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ITokenCreationService _jwtService;
-        public UsersController(UserManager<Users> userManager, ITokenCreationService jwtService, RoleManager<IdentityRole> roleManager)
+        private readonly IConfiguration _configuration;
+
+        public UsersController(UserManager<Users> userManager, ITokenCreationService jwtService, RoleManager<IdentityRole> roleManager, IConfiguration configuration)
         {
             _userManager = userManager;
             _roleManager = roleManager;
             _jwtService = jwtService;
+            _configuration = configuration;
         }
 
         // POST: api/Users
@@ -46,9 +51,18 @@ namespace Custom_Google_Auth.Controllers
                     {
                         return StatusCode(StatusCodes.Status500InternalServerError, new { Status = "Error", Message = "User creation failed! Please check user details and try again." });
                     }
-                    result = await _userManager.AddToRoleAsync(user, model.Role);
+                    //string role;
+                    //if(model.Role == null)
+                    //{
+                    //    role = "User";
+                    //}
+                    //else
+                    //{
+                    //    role = "Admin";
+                    //}
+                    result = await _userManager.AddToRoleAsync(user, "User");
                     
-                    var token = _jwtService.CreateToken(user,model.Role);
+                    var token = _jwtService.CreateToken(user, "User");
 
                     user.PasswordHash = null;
                     return Created("", new { token, user });
@@ -57,13 +71,67 @@ namespace Custom_Google_Auth.Controllers
             {
                     return StatusCode(StatusCodes.Status500InternalServerError, new { Status = "Error", Message = "Invalid Role! ", Role = "role" });
             }
+
+        }
+        [HttpPost()]
+        [Route("AuthenticateWithGoogle")]
+        public async Task<ActionResult> AuthenticateWithGoogle(string token)
+        {
+            try
+            {
+                if (token == null)
+                {
+                    return BadRequest();
+                }
+                var googleUser = await GoogleJsonWebSignature.ValidateAsync(token, new GoogleJsonWebSignature.ValidationSettings()
+                {
+                    Audience = new[] { "99100766691-r1u3hcr886oqtvl8t2i7curc94ccikmu.apps.googleusercontent.com" }
+                });
+                if(googleUser != null)
+                {
+                    var userExists = await _userManager.FindByNameAsync(googleUser.Email);
+                    
+                    if (userExists == null)
+                    {
+                        //Create User
+                        Users user = new Users() {UserName = googleUser.Email , Email = googleUser.Email};
+                        
+                        var result = await _userManager.CreateAsync(user);
+                        //Add user role
+                        result = await _userManager.AddToRoleAsync(user, "User");
+                        if (!result.Succeeded)
+                        {
+                            return StatusCode(StatusCodes.Status500InternalServerError, new { Status = "Error", Message = "User creation failed! Please check user details and try again." });
+                        }
+                        var jwtToken = _jwtService.CreateToken(user, "User");
+                        return Created("" , new { jwtToken , user });
+
+                    }
+                    else
+                    {
+                        var jwtToken = _jwtService.CreateToken(userExists, "User");
+                        return Ok(new { jwtToken, userExists });
+                    }
+                }
+                else
+                {
+                    return BadRequest();
+                }
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+           
             
         }
         [HttpPost]
         [Route("Login")]
         public async Task<ActionResult> Login(LoginModel model)
         {
-            var user = await _userManager.FindByNameAsync(model.UserName);
+            var user = await _userManager.FindByEmailAsync(model.Email);
             if (user != null && await _userManager.CheckPasswordAsync(user, model.Password))
             {
                 var userRole = await _userManager.GetRolesAsync(user);

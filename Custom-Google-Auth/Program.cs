@@ -29,11 +29,11 @@ builder.Services
     { 
         options.SignIn.RequireConfirmedAccount = false;
         options.User.RequireUniqueEmail = true;
-        options.Password.RequireDigit = false;
-        options.Password.RequiredLength = 6;
-        options.Password.RequireNonAlphanumeric = false;
-        options.Password.RequireUppercase = false;
-        options.Password.RequireLowercase = false;
+        //options.Password.RequireDigit = false;
+        //options.Password.RequiredLength = 6;
+        //options.Password.RequireNonAlphanumeric = false;
+        //options.Password.RequireUppercase = false;
+        //options.Password.RequireLowercase = false;
     })
     .AddRoles<IdentityRole>()
     .AddEntityFrameworkStores<ApplicationDbContext>();
@@ -45,6 +45,11 @@ builder.Services
         options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
         options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
         options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+    })
+    .AddGoogle(googleOptions =>
+    {
+        googleOptions.ClientId = builder.Configuration["Authentication:Google:ClientId"];
+        googleOptions.ClientSecret = builder.Configuration["Authentication:Google:ClientSecret"];
     })
     .AddJwtBearer(options => //Adding Jwt Bearer
     {

@@ -143,14 +143,14 @@ namespace CustomGoogleAuth.Migrations
                     b.HasData(
                         new
                         {
-                            Id = "226b3610-f3e5-4cab-bfda-97a18275ee56",
+                            Id = "bc69af5c-8e0c-4a77-aa66-c2a1a010170e",
                             ConcurrencyStamp = "1",
                             Name = "Admin",
                             NormalizedName = "Admin"
                         },
                         new
                         {
-                            Id = "2b03696f-6b96-4747-982b-d75f52cc8fd5",
+                            Id = "3ca82870-81d9-4a1c-a205-13fa812d018b",
                             ConcurrencyStamp = "2",
                             Name = "User",
                             NormalizedName = "User"
